@@ -1,8 +1,16 @@
 from flask import Flask,jsonify,request
 import sqlite3
+from flask_httpauth import HTTPBasicAuth
 
 app=Flask(__name__)
+auth=HTTPBasicAuth()
 
+users={"rashmi":"123456789"}
+
+@auth.verify_password
+def verify_password(username,password):
+    if username in users and users[username]==password:
+        return username
 
 
 # Create a route to get all the data from the database
@@ -31,6 +39,7 @@ def get_data_by_id(id):
 
 #Create a route to add data to the database
 @app.route('/add_emp_data',methods=['POST'])
+@auth.login_required
 def add_emp():
     try:
         conn=sqlite3.connect("employee.db")
@@ -66,7 +75,7 @@ def update_emp(id):
     finally:
         conn.close()
         
-        
+
 #Create a route to delete data from the database
 @app.route('/delete_emp/<int:id>',methods=['DELETE'])
 def delete_emp(id):
